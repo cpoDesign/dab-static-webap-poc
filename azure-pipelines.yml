@@ -1,0 +1,53 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  - group: azure-credentials
+  - name: NODE_VERSION
+    value: '18.x'
+
+stages:
+- stage: Build
+  displayName: Build and Deploy
+  jobs:
+  - job: BuildAndDeploy
+    displayName: Build and Deploy
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: $(NODE_VERSION)
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install -g @azure/static-web-apps-cli
+      displayName: 'Install Static Web Apps CLI'
+
+    - task: Npm@1
+      inputs:
+        command: 'install'
+        workingDir: 'api-dashboard'
+      displayName: 'Install Next.js dependencies'
+
+    - task: Npm@1
+      inputs:
+        command: 'custom'
+        customCommand: 'run build'
+        workingDir: 'api-dashboard'
+      displayName: 'Build Next.js app'
+
+    - task: AzureStaticWebApp@0
+      inputs:
+        app_location: 'api-dashboard'
+        api_location: '.'
+        output_location: 'out'
+        azure_static_web_apps_api_token: $(AZURE_STATIC_WEB_APP_TOKEN)
+        app_settings: |
+          DOCKER_SQL_SERVER=$(DOCKER_SQL_SERVER)
+          DOCKER_SQL_PORT=$(DOCKER_SQL_PORT)
+          DOCKER_SQL_USER=$(DOCKER_SQL_USER)
+          DOCKER_SQL_PASSWORD=$(DOCKER_SQL_PASSWORD)
+          DOCKER_SQL_DATABASE=$(DOCKER_SQL_DATABASE)
+      displayName: 'Deploy to Azure Static Web Apps' 

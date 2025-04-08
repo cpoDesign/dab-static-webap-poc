@@ -1,0 +1,8 @@
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /app
+RUN dotnet tool install --global grate
+
+FROM mcr.microsoft.com/dotnet/runtime:8.0
+WORKDIR /app
+COPY --from=build /root/.dotnet/tools /root/.dotnet/tools
+ENV PATH="/root/.dotnet/tools:${PATH}"

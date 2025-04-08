@@ -1,0 +1,69 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Static Web App"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    },
+    "sku": {
+      "type": "string",
+      "defaultValue": "Free",
+      "allowedValues": [
+        "Free",
+        "Standard"
+      ],
+      "metadata": {
+        "description": "SKU of the Static Web App"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/staticSites",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('name')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('sku')]"
+      },
+      "properties": {
+        "buildProperties": {
+          "appLocation": "api-dashboard",
+          "apiLocation": ".",
+          "outputLocation": "out"
+        },
+        "stagingEnvironmentPolicy": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.Web/staticSites/config",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('name'), '/appsettings')]",
+      "properties": {
+        "appSettings": {
+          "DOCKER_SQL_SERVER": "your-docker-host-ip",
+          "DOCKER_SQL_PORT": "1433",
+          "DOCKER_SQL_USER": "sa",
+          "DOCKER_SQL_PASSWORD": "YourStrong@Passw0rd",
+          "DOCKER_SQL_DATABASE": "pubs"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "staticWebAppUrl": {
+      "type": "string",
+      "value": "[concat('https://', parameters('name'), '.azurewebsites.net')]"
+    }
+  }
+} 

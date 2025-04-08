@@ -1,0 +1,9 @@
+{
+  "name": "data-api-builder-poc",
+  "version": "1.0.0",
+  "description": "Azure Data API Builder POC with Static Web App",
+  "scripts": {
+    "start": "dab start",
+    "build": "dab build"
+  }
+} 
